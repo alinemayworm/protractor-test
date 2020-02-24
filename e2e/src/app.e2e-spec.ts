@@ -1,23 +1,37 @@
 import { AppPage } from './app.po';
-import { browser, logging } from 'protractor';
+import { MockBackend } from './mock-backend.po';
+import { AppConstants } from '../../src/app/app.constants';
+
 
 describe('workspace-project App', () => {
   let page: AppPage;
+  const backend: MockBackend = new MockBackend();
 
-  beforeEach(() => {
+  beforeAll(() => {
+    backend.start();
+  });
+
+
+  beforeEach(async () => {
     page = new AppPage();
   });
 
-  it('should display welcome message', () => {
-    page.navigateTo();
-    expect(page.getTitleText()).toEqual('Protractor-webapp-e2e app is running!');
+  it('should display welcome message - blue - english', async (done) => {
+    await page.navigateTo('');
+    page.bBrowser.sleep(1000);
+    expect(await page.takeScreenShot('welcome-blue')).toBeTruthy();
+    page.clickIn('#change-color');
+    page.scrollToTop();
+    page.bBrowser.sleep(1000);
+    expect(await page.takeScreenShot('welcome-pink')).toBeTruthy();
+    done();
   });
 
   afterEach(async () => {
-    // Assert that there are no errors emitted from the browser
-    const logs = await browser.manage().logs().get(logging.Type.BROWSER);
-    expect(logs).not.toContain(jasmine.objectContaining({
-      level: logging.Level.SEVERE,
-    } as logging.Entry));
+    page.bBrowser.close();
+  });
+
+  afterAll(() => {
+    backend.stop();
   });
 });
